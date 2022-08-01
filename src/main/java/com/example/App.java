@@ -1,10 +1,7 @@
 package com.example;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
+import java.io.InputStream;
+import java.net.URL;
 
 
 //conecta a api do imdb
@@ -16,18 +13,21 @@ public class App {
         //String url = "https://imdb-api.com/en/API/Top250Movies/k_t8yk1w79";
         String url = "https://alura-imdb-api.herokuapp.com/movies";
 
-        HttpClient client = HttpClient.newHttpClient();
+        Client client = new Client();
+        String json = client.search(url);
 
-        URI endereco = URI.create(url);
+        for (Filme filme : jsonParser.parse(json)) {
+            
+            //pega a imagem e titulo do filme para criar um arquivo de imagem com seu titulo como nome
+            String urlfilme = filme.getImagem();
+            String tt = filme.getTitulo();
+            String tittle = tt + ".png";
+            InputStream inputStream = new URL(urlfilme).openStream();
+            StickerFactory create = new StickerFactory();
+            //cria o sticker apartir da imagem e titulo do filme
+            create.create(inputStream, tittle);
 
-        HttpRequest request = HttpRequest.newBuilder(endereco).GET().build();
-
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-
-        String body = response.body();
-
-
-        for (Filme filme : jsonParser.parse(body)) {
+            //printa no console os dados do filme, juntamente com a sua nota como estrelas em unicode
             Double nota = Double.parseDouble(filme.getAvaliacao());
             System.out.println(filme.getTitulo());
             System.out.println(filme.getImagem());
@@ -37,9 +37,5 @@ public class App {
             }
             System.out.println("\n");
         }
-        //usar biblioteca jackson para converter json para objeto
-        //var jsonParser = new JsonParser();
-        //List<Map<String, String>> listaDeFilmes = jsonParser.parse(body);
-
-}
+    }
 }
